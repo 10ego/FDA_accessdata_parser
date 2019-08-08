@@ -126,5 +126,6 @@ class accessdata_parser():
 				productlist[urls[counter][-6:]] = [{"company_name":company_name, "appID": app_id}]
 				for table in data_tables:
 					productlist[urls[counter][-6:]].append(self.parse_datatable(table))
+				print("DEBUGGING PURPOSES", productlist.keys())
 				counter+=1
 		return productlist
