@@ -69,6 +69,15 @@ class accessdata_parser():
 					for x in s:
 						d[tmp[c]].append(x)
 					c+=1
+		if d.get('Url'):
+			raw_urls = d['Url']
+			urls = []
+			print("Rebuilding URLs")
+			for url in raw_urls:
+				tmp_url = url.split()
+				print(tmp_url)
+				urls+=tmp_url
+			d['Url'] = urls
 		return d
 
 	async def fetch(self, session, url):
