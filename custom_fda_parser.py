@@ -72,11 +72,21 @@ class accessdata_parser():
 		if d.get('Url'):
 			raw_urls = d['Url']
 			urls = []
-			print("Rebuilding URLs")
+			## Ugly but had to be done to clean up for URLs containing comma values
 			for url in raw_urls:
 				tmp_url = url.split()
-				print(tmp_url)
-				urls+=tmp_url
+				if len(tmp_url) > 1:
+					concat_url = ''
+					for inner_url in tmp_url:
+						if not '.' in inner_url[-5:]:
+							concat_url+=inner_url
+						else:
+							concat_url+=inner_url
+							tmp_url = concat_url
+							concat_url=''
+					urls+= concat_url
+				else:
+					urls+= tmp_url
 			d['Url'] = urls
 		return d
 
