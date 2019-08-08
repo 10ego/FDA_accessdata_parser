@@ -15,4 +15,5 @@ def api():
 		api = accessdata_parser(request.args['search'])
 		return jsonify(api.build_productlist())
 
-app.run()
+if __name__ == "__main__":
+	app.run()
