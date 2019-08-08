@@ -2,7 +2,6 @@ from bs4 import BeautifulSoup
 import requests
 import asyncio
 import aiohttp
-from datetime import datetime
 
 class accessdata_parser():
 	def __init__(self, search_term):
@@ -14,7 +13,6 @@ class accessdata_parser():
 		r = requests.post(querypage, headers = headers, data = payload)
 		self.fda_queried_data = r.content.decode("utf-8")
 		print("Raw HTML from FDA ready (data size:{})".format(len(self.fda_queried_data)))
-		self.timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 	def build_soup(self):
 		raw_soup = BeautifulSoup(self.fda_queried_data, 'html.parser')
@@ -92,8 +90,9 @@ class accessdata_parser():
 	def build_productlist(self):
 		productlist = {}
 		counter = 0
-		if self.build_soup():
-			urls = ["https://www.accessdata.fda.gov"+url for url in self.build_soup()]
+		pot = self.build_soup()
+		if pot:
+			urls = ["https://www.accessdata.fda.gov"+url for url in pot]
 			parser_loop = asyncio.new_event_loop()
 			asyncio.set_event_loop(parser_loop)
 			print("Parser loop initialized", parser_loop)
@@ -109,5 +108,4 @@ class accessdata_parser():
 				for table in data_tables:
 					productlist[urls[counter][-6:]].append(self.parse_datatable(table))
 				counter+=1
-		productlist["meta"]= {"timestamp": self.timestamp, "requester":"hc"}
 		return productlist

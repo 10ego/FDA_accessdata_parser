@@ -1,6 +1,7 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 import requests
 from custom_fda_parser import accessdata_parser
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
@@ -11,9 +12,27 @@ def default():
 
 @app.route('/api/v1/resources/accessdataFDA', methods=['GET'])
 def api():
-	if "search" in request.args:
-		api = accessdata_parser(request.args['search'])
-		return jsonify(api.build_productlist())
+	try:
+		if "search" in request.args:
+			api = accessdata_parser(request.args['search'])
+			response = api.build_productlist()
+			if response == {}:
+				print('404')
+				status_code = 404
+				response['message'] = "No results found for {}".format(request.args['search'])
+			elif len(response)>0:
+				print('200')
+				status_code = 200
+
+			else:
+				print('500')
+				response['message'] = "Internal server error"
+				status_code = 500
+
+			response['meta'] = {'requester':'hc','timestamp':datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+			return make_response(jsonify(response), status_code)
+	except:
+		return make_response("Bad request error", 400)
 
 if __name__ == "__main__":
 	app.run()
