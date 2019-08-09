@@ -20,7 +20,7 @@ class accessdata_parser():
 		for string in raw_soup.find_all('h4'):
 			checker = next(string.stripped_strings)
 		if checker.startswith('Search Results for'):
-			continue
+			pass
 		else:
 			return [str(raw_soup)], True
 		drug_hits = raw_soup.find_all("a", title="Click to expand drug name")
