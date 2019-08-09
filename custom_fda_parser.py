@@ -17,6 +17,12 @@ class accessdata_parser():
 	def build_soup(self):
 		raw_soup = BeautifulSoup(self.fda_queried_data, 'html.parser')
 		print("raw soup size:", len(raw_soup))
+		for string in raw_soup.find_all('h4'):
+			checker = next(string.stripped_strings)
+		if checker.startswith('Search Results for'):
+			continue
+		else:
+			return [str(raw_soup)], True
 		drug_hits = raw_soup.find_all("a", title="Click to expand drug name")
 		drug_hits_links = raw_soup.find_all("ul", class_="collapse")
 		print("Found hit size: ",len(drug_hits), len(drug_hits_links))
@@ -31,6 +37,8 @@ class accessdata_parser():
 			li_data = BeautifulSoup(str(li), 'html.parser')
 			for href in li_data.find_all('a', href=True):
 				link_hits.append(href['href'])
+		print("Found raw terms:,", drug_hits)
+		print("Found terms:", hits)
 		try:
 			p = hits.index(self.search_term.upper())
 			print("Found term at", p)
@@ -40,14 +48,14 @@ class accessdata_parser():
 			if len(drug_hits_links)>1:
 				end_link = drug_hits_links[p+1].find_all('a', href=True)[0]['href']
 				link_range_end = link_hits.index(end_link)
-				return link_hits[link_range_start:link_range_end]
+				return link_hits[link_range_start:link_range_end], False
 			else:
-				return [link_hits[link_range_start]]
+				return [link_hits[link_range_start]], False
 			
 		except Exception as e:
 			print("Did not find term")
 			print(e.args)
-			return []
+			return [], False
 
 	def parse_datatable(self, datatable):
 		joup = BeautifulSoup(str(datatable),'html.parser')
@@ -109,23 +117,26 @@ class accessdata_parser():
 	def build_productlist(self):
 		productlist = {}
 		counter = 0
-		pot = self.build_soup()
+		pot, directed = self.build_soup()
 		if pot:
-			urls = ["https://www.accessdata.fda.gov"+url for url in pot]
-			parser_loop = asyncio.new_event_loop()
-			asyncio.set_event_loop(parser_loop)
-			print("Parser loop initialized", parser_loop)
-			parsed_htmls = parser_loop.run_until_complete(self.async_process(urls))
-			parser_loop.close()
-			print("Parsed {} htmls".format(len(parsed_htmls)))
+			if directed:
+				parsed_htmls = pot
+			else:
+				urls = ["https://www.accessdata.fda.gov"+url for url in pot]
+				parser_loop = asyncio.new_event_loop()
+				asyncio.set_event_loop(parser_loop)
+				print("Parser loop initialized", parser_loop)
+				parsed_htmls = parser_loop.run_until_complete(self.async_process(urls))
+				parser_loop.close()
+				print("Parsed {} htmls".format(len(parsed_htmls)))
 			for link in parsed_htmls:
 				soup2 = BeautifulSoup(link, 'html.parser')
 				app_id = [string for string in soup2.find_all('span', class_='appl-details-top')[0].stripped_strings][0]
 				company_name = [string for string in soup2.find_all('span', class_='appl-details-top')[1].stripped_strings][0]
 				data_tables = soup2.find_all('table')
-				productlist[urls[counter][-6:]] = [{"company_name":company_name, "appID": app_id}]
+				productlist[app_id] = [{"company_name":company_name, "appID": app_id}]
 				for table in data_tables:
-					productlist[urls[counter][-6:]].append(self.parse_datatable(table))
+					productlist[app_id].append(self.parse_datatable(table))
 				print("DEBUGGING PURPOSES", productlist.keys())
 				counter+=1
 		return productlist
