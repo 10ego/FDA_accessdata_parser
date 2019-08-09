@@ -30,6 +30,7 @@ def api():
 				status_code = 500
 
 			response['meta'] = {'requester':'hc','timestamp':datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+			print("DEBUGGING MATCH KEYS?:", response.keys())
 			return make_response(jsonify(response), status_code)
 	except:
 		return make_response("Bad request error", 400)
