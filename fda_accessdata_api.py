@@ -38,7 +38,7 @@ def api():
 		return make_response(jsonify(response), status_code)
 	except Exception as e:
 		print("Exception caught:", type(e), e.args)
-		return make_response("Bad request error", 400)
+		return make_response("Internal server error", 500)
 
 if __name__ == "__main__":
 	app.run()
