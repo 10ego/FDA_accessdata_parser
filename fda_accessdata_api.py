@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request, make_response
 import requests
 from custom_fda_parser import accessdata_parser
 from datetime import datetime
-
+import json 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 
