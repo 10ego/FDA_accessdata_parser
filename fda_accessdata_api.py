@@ -28,11 +28,16 @@ def api():
 				print('500')
 				response['message'] = "Internal server error"
 				status_code = 500
+		else:
+			print('400')
+			status_code = 400
+			return make_response("Bad request error", 400)
 
-			response['meta'] = {'requester':'hc','timestamp':datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-			print("DEBUGGING MATCH KEYS?:", response.keys())
-			return make_response(jsonify(response), status_code)
-	except:
+		response['meta'] = {'requester':'hc','timestamp':datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+		print("DEBUGGING MATCH KEYS?:", response.keys())
+		return make_response(jsonify(response), status_code)
+	except Exception as e:
+		print("Exception caught:", type(e), e.args)
 		return make_response("Bad request error", 400)
 
 if __name__ == "__main__":
