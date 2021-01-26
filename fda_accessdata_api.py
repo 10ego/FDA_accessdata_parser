@@ -8,7 +8,7 @@ app.config['JSON_AS_ASCII'] = False
 
 @app.route('/', methods=['GET'])
 def default():
-	return 'Drugs@FDA data parser API v 0.1'
+	return 'Drugs@FDA data parser API v 0.1\n Access API at /api/v1/resources/accessdataFDA?search={DRUG_NAME}'
 
 @app.route('/api/v1/resources/accessdataFDA', methods=['GET'])
 def api():
